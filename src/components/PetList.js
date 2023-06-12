@@ -3,23 +3,19 @@ import petsData from "../petsData";
 import PetItem from "./PetItem";
 import Modal from "./Modal";
 import { getPets } from "../api/pets";
+import { useQuery } from "@tanstack/react-query";
 
 const PetList = () => {
   const [query, setQuery] = useState("");
   const [showModal, setShowModal] = useState(false);
-  const [pets, setPets] = useState([]);
-  const callApi = async () => {
-    const res = await getPets();
-    setPets(res);
-  };
-  console.log(pets);
 
-  useEffect(() => {
-    callApi();
-  }, []);
+  const newPets = useQuery({
+    queryKey: ["pets"],
+    queryFn: getPets,
+  });
 
-  const petList = pets
-    .filter((pet) => pet.name.toLowerCase().includes(query.toLowerCase()))
+  const petList = newPets.data
+    ?.filter((pet) => pet.name.toLowerCase().includes(query.toLowerCase()))
     .map((pet) => <PetItem pet={pet} key={pet.id} />);
   return (
     <>

@@ -21,8 +21,8 @@ const updatePet = async (petId, name, type, image, adopted) => {
     image: image,
   });
 };
-const getPetByid = async (petId) => {
-  const res = await instance.get(`pets/${petId}`);
+const getPetByid = async (id) => {
+  const res = await instance.get(`pets/${id}`);
   return res.data;
 };
 const removePet = async (petId) => {

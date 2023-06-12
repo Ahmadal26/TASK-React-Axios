@@ -2,23 +2,37 @@ import React, { useEffect, useState } from "react";
 import petsData from "../petsData";
 import { useParams } from "react-router-dom";
 import { getPetByid, removePet, updatePet } from "../api/pets";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
+
 const PetDetail = () => {
   const { petId } = useParams();
-  const [pet, setPet] = useState([]);
+  const { data: pet } = useQuery({
+    queryKey: ["pet", petId],
+    queryFn: () => getPetByid(petId),
+  });
+  const queryClient = useQueryClient();
 
-  const callApi = async () => {
-    const res = await getPetByid(petId);
-    setPet(res);
-  };
+  const mutation = useMutation({
+    mutationFn: () =>
+      updatePet(pet.id, pet.name, pet.image, pet.type, pet.adopted),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pet"] });
+    },
+  });
+
   const handelUpdate = () => {
-    updatePet(pet.id, pet.name, pet.image, pet.type, pet.adopted);
+    mutation.mutate();
   };
-  useEffect(() => {
-    callApi();
-  }, []);
 
+  const { mutate: Removepet } = useMutation({
+    mutationFn: () => removePet(petId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pet"] });
+    },
+  });
   const handelRemove = () => {
-    removePet(petId);
+    Removepet();
   };
   if (!pet) return <h1>There is no pet with the id: ${petId}</h1>;
   return (

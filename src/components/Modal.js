@@ -1,6 +1,11 @@
 import React, { useState } from "react";
 import Input from "./Input";
 import { addPet } from "../api/pets";
+import {
+  hashQueryKey,
+  useMutation,
+  useQueryClient,
+} from "@tanstack/react-query";
 
 const Modal = ({ show, setShowModal }) => {
   const [name, setName] = useState("");
@@ -8,8 +13,16 @@ const Modal = ({ show, setShowModal }) => {
   const [image, setImage] = useState("");
   const [available, setAvailable] = useState(0);
 
+  const queryClient = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: () => addPet(name, type, image, available),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pets"] });
+    },
+  });
+
   const handelSubmit = () => {
-    addPet(name, type, image, available);
+    mutation.mutate();
   };
   if (!show) return "";
   return (
